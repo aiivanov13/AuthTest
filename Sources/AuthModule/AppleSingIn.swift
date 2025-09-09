@@ -9,7 +9,7 @@ import Foundation
 import AuthenticationServices
 
 public final class AppleAuth: NSObject {
-    static var shared: AppleAuth { AppleAuth() }
+    public static var shared: AppleAuth { AppleAuth() }
     private var dispatch: ((AuthAction) -> Void)?
     
     private override init() {
