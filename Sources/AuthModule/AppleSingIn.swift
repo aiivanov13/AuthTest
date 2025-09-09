@@ -9,41 +9,74 @@ import Foundation
 import AuthenticationServices
 
 @MainActor
-public final class AppleAuth: NSObject {
-    private var dispatch: ((AuthAction) -> Void)?
+final class AppleAuth {
+//    private var dispatch: ((AuthAction) -> Void)?
+//    
+//    init(dispatch: @escaping (AuthAction) -> Void) {
+//        self.dispatch = dispatch
+//        super.init()
+//    }
     
-    init(dispatch: @escaping (AuthAction) -> Void) {
-        self.dispatch = dispatch
-        super.init()
-    }
-    
-    func signIn() {
+    static func signIn(dispatch: @escaping (AuthAction) -> Void) {
         let provider = ASAuthorizationAppleIDProvider()
         let request = provider.createRequest()
         request.requestedScopes = [.fullName, .email]
         
         let controller = ASAuthorizationController(authorizationRequests: [request])
-        controller.delegate = self
-        controller.presentationContextProvider = self
+        let delegate = AppleAuthDelegate(dispatch: dispatch)
+        controller.delegate = delegate
+        controller.presentationContextProvider = delegate
         controller.performRequests()
+        AppleAuthDelegateHolder.shared.delegate = delegate
     }
 }
 
-extension AppleAuth: ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
-    public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+final class AppleAuthDelegate: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+    private let dispatch: (AuthAction) -> Void
+    
+    init(dispatch: @escaping (AuthAction) -> Void) {
+        self.dispatch = dispatch
+    }
+    
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         if let credential = authorization.credential as? ASAuthorizationAppleIDCredential {
             let user = User(id: credential.user, name: credential.fullName?.givenName, email: credential.email)
-            dispatch?(.success(user))
+            dispatch(.success(user))
         } else {
-            dispatch?(.failure("Не удалось получить credential"))
+            dispatch(.failure("Не удалось получить credential"))
         }
     }
     
-    public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        dispatch?(.failure(error.localizedDescription))
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        dispatch(.failure(error.localizedDescription))
     }
     
-    public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
         UIApplication.shared.windows.first { $0.isKeyWindow }!
     }
 }
+
+private final class AppleAuthDelegateHolder {
+    @MainActor static let shared = AppleAuthDelegateHolder()
+    var delegate: AppleAuthDelegate?
+    private init() {}
+}
+
+//extension AppleAuth: ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+//    public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+//        if let credential = authorization.credential as? ASAuthorizationAppleIDCredential {
+//            let user = User(id: credential.user, name: credential.fullName?.givenName, email: credential.email)
+//            dispatch?(.success(user))
+//        } else {
+//            dispatch?(.failure("Не удалось получить credential"))
+//        }
+//    }
+//    
+//    public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+//        dispatch?(.failure(error.localizedDescription))
+//    }
+//    
+//    public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+//        UIApplication.shared.windows.first { $0.isKeyWindow }!
+//    }
+//}
