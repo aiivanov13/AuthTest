@@ -8,8 +8,8 @@
 import Foundation
 
 public final class AuthModule {
-    static var shared: AuthModule { AuthModule() }
-    let appleAuth = AppleAuth()
+    public static var shared: AuthModule { AuthModule() }
+    private let appleAuth = AppleAuth()
     
     private init() { }
     
