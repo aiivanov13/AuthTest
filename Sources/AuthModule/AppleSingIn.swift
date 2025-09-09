@@ -8,13 +8,13 @@
 import Foundation
 import AuthenticationServices
 
-final class AppleAuth: NSObject {
-//    static var shared: AppleAuth { AppleAuth() }
+public final class AppleAuth: NSObject {
+    static var shared: AppleAuth { AppleAuth() }
     private var dispatch: ((AuthAction) -> Void)?
     
-//    private override init() {
-//        super.init()
-//    }
+    private override init() {
+        super.init()
+    }
     
     func signIn(dispatch: @escaping (AuthAction) -> Void) {
         self.dispatch = dispatch
@@ -31,7 +31,7 @@ final class AppleAuth: NSObject {
 }
 
 extension AppleAuth: ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+    public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         if let credential = authorization.credential as? ASAuthorizationAppleIDCredential {
             let user = User(id: credential.user, name: credential.fullName?.givenName, email: credential.email)
             dispatch?(.success(user))
@@ -40,11 +40,11 @@ extension AppleAuth: ASAuthorizationControllerDelegate, ASAuthorizationControlle
         }
     }
     
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+    public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         dispatch?(.failure(error.localizedDescription))
     }
     
-    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+    public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
         UIApplication.shared.windows.first { $0.isKeyWindow }!
     }
 }
