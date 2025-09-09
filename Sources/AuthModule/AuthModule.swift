@@ -7,8 +7,8 @@
 
 import Foundation
 
-final class AuthModule {
-    static func signIn(_ type: AuthProviderType, dispatch: @escaping (AuthAction) -> Void) {
+public final class AuthModule {
+    public static func signIn(_ type: AuthProviderType, dispatch: @escaping (AuthAction) -> Void) {
         switch type {
         case .apple:
             AppleAuth.shared.signIn(dispatch: dispatch)
