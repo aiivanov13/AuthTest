@@ -9,10 +9,17 @@ import Foundation
 
 @MainActor
 public final class AuthModule {
+    private static var appleDelegate: AppleAuth.AppleDelegate?
+    
     public static func signIn(_ type: AuthProviderType, dispatch: @escaping (AuthAction) -> Void) {
         switch type {
         case .apple:
-            AppleAuth.signIn(dispatch: dispatch)
+            let delegate = AppleAuthDelegate(dispatch: dispatch) {
+                AuthModule.appleDelegate = nil
+            }
+            
+            appleDelegate = delegate
+            AppleAuth.signIn(delegate: delegate)
         case .google:
             dispatch(.failure("Авторизация google не реализована"))
         case .email:

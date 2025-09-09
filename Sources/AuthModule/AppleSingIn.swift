@@ -10,6 +10,7 @@ import AuthenticationServices
 
 @MainActor
 final class AppleAuth {
+    typealias AppleDelegate = ASAuthorizationControllerDelegate & ASAuthorizationControllerPresentationContextProviding
 //    private var dispatch: ((AuthAction) -> Void)?
 //    
 //    init(dispatch: @escaping (AuthAction) -> Void) {
@@ -17,25 +18,29 @@ final class AppleAuth {
 //        super.init()
 //    }
     
-    static func signIn(dispatch: @escaping (AuthAction) -> Void) {
+    static func signIn(delegate: AppleDelegate?) {
         let provider = ASAuthorizationAppleIDProvider()
         let request = provider.createRequest()
         request.requestedScopes = [.fullName, .email]
         
         let controller = ASAuthorizationController(authorizationRequests: [request])
-        let delegate = AppleAuthDelegate(dispatch: dispatch)
+        
+//        let signInDelegate = AppleAuthDelegate(dispatch: dispatch) { [delegate] in
+//            delegate = nil
+//        }
         controller.delegate = delegate
         controller.presentationContextProvider = delegate
         controller.performRequests()
-        AppleAuthDelegateHolder.shared.delegate = delegate
     }
 }
 
 final class AppleAuthDelegate: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
     private let dispatch: (AuthAction) -> Void
+    private let onFinish: () -> Void
     
-    init(dispatch: @escaping (AuthAction) -> Void) {
+    init(dispatch: @escaping (AuthAction) -> Void, onFinish: @escaping () -> Void) {
         self.dispatch = dispatch
+        self.onFinish = onFinish
     }
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
@@ -45,21 +50,17 @@ final class AppleAuthDelegate: NSObject, ASAuthorizationControllerDelegate, ASAu
         } else {
             dispatch(.failure("Не удалось получить credential"))
         }
+        onFinish()
     }
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         dispatch(.failure(error.localizedDescription))
+        onFinish()
     }
     
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
         UIApplication.shared.windows.first { $0.isKeyWindow }!
     }
-}
-
-private final class AppleAuthDelegateHolder {
-    @MainActor static let shared = AppleAuthDelegateHolder()
-    var delegate: AppleAuthDelegate?
-    private init() {}
 }
 
 //extension AppleAuth: ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
