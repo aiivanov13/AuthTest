@@ -9,12 +9,12 @@ import Foundation
 import AuthenticationServices
 
 final class AppleAuth: NSObject {
-    static var shared: AppleAuth { AppleAuth() }
+//    static var shared: AppleAuth { AppleAuth() }
     private var dispatch: ((AuthAction) -> Void)?
     
-    private override init() {
-        super.init()
-    }
+//    private override init() {
+//        super.init()
+//    }
     
     func signIn(dispatch: @escaping (AuthAction) -> Void) {
         self.dispatch = dispatch

@@ -8,10 +8,15 @@
 import Foundation
 
 public final class AuthModule {
-    public static func signIn(_ type: AuthProviderType, dispatch: @escaping (AuthAction) -> Void) {
+    static var shared: AuthModule { AuthModule() }
+    let appleAuth = AppleAuth()
+    
+    private init() { }
+    
+    public func signIn(_ type: AuthProviderType, dispatch: @escaping (AuthAction) -> Void) {
         switch type {
         case .apple:
-            AppleAuth.shared.signIn(dispatch: dispatch)
+            appleAuth.signIn(dispatch: dispatch)
         case .google:
             dispatch(.failure("Авторизация google не реализована"))
         case .email:
