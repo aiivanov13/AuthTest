@@ -8,17 +8,16 @@
 import Foundation
 import AuthenticationServices
 
+@MainActor
 public final class AppleAuth: NSObject {
-    public static var shared: AppleAuth { AppleAuth() }
     private var dispatch: ((AuthAction) -> Void)?
     
-    private override init() {
+    init(dispatch: @escaping (AuthAction) -> Void) {
+        self.dispatch = dispatch
         super.init()
     }
     
-    func signIn(dispatch: @escaping (AuthAction) -> Void) {
-        self.dispatch = dispatch
-
+    func signIn() {
         let provider = ASAuthorizationAppleIDProvider()
         let request = provider.createRequest()
         request.requestedScopes = [.fullName, .email]
