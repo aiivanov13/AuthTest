@@ -11,23 +11,13 @@ import AuthenticationServices
 @MainActor
 final class AppleAuth {
     typealias AppleDelegate = ASAuthorizationControllerDelegate & ASAuthorizationControllerPresentationContextProviding
-//    private var dispatch: ((AuthAction) -> Void)?
-//    
-//    init(dispatch: @escaping (AuthAction) -> Void) {
-//        self.dispatch = dispatch
-//        super.init()
-//    }
-    
+
     static func signIn(delegate: AppleDelegate?) {
         let provider = ASAuthorizationAppleIDProvider()
         let request = provider.createRequest()
         request.requestedScopes = [.fullName, .email]
         
         let controller = ASAuthorizationController(authorizationRequests: [request])
-        
-//        let signInDelegate = AppleAuthDelegate(dispatch: dispatch) { [delegate] in
-//            delegate = nil
-//        }
         controller.delegate = delegate
         controller.presentationContextProvider = delegate
         controller.performRequests()
@@ -62,22 +52,3 @@ final class AppleAuthDelegate: NSObject, ASAuthorizationControllerDelegate, ASAu
         UIApplication.shared.windows.first { $0.isKeyWindow }!
     }
 }
-
-//extension AppleAuth: ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
-//    public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-//        if let credential = authorization.credential as? ASAuthorizationAppleIDCredential {
-//            let user = User(id: credential.user, name: credential.fullName?.givenName, email: credential.email)
-//            dispatch?(.success(user))
-//        } else {
-//            dispatch?(.failure("Не удалось получить credential"))
-//        }
-//    }
-//    
-//    public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-//        dispatch?(.failure(error.localizedDescription))
-//    }
-//    
-//    public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-//        UIApplication.shared.windows.first { $0.isKeyWindow }!
-//    }
-//}
