@@ -20,9 +20,10 @@ public final class AuthModule {
             
             appleDelegate = delegate
             AppleSignIn.signIn(delegate: delegate)
-        case .google(let serverClientID):
+        case .google(let clientID, let serverClientID):
             GoogleSignIn.signIn(
                 dispatch: dispatch,
+                clientID: clientID,
                 serverClientID: serverClientID
             )
         case .email:
