@@ -9,9 +9,9 @@ import Foundation
 
 @MainActor
 public final class AuthModule {
-    private static var appleDelegate: AppleAuth.AppleDelegate?
+    private static var appleDelegate: AppleSignIn.AppleDelegate?
     
-    public static func signIn(_ type: AuthProviderType, dispatch: @escaping (AuthAction) -> Void) {
+    public static func signIn(_ type: AuthType, dispatch: @escaping (ReturnedType) -> Void) {
         switch type {
         case .apple:
             let delegate = AppleAuthDelegate(dispatch: dispatch) {
@@ -19,9 +19,13 @@ public final class AuthModule {
             }
             
             appleDelegate = delegate
-            AppleAuth.signIn(delegate: delegate)
-        case .google:
-            dispatch(.failure("Авторизация google не реализована"))
+            AppleSignIn.signIn(delegate: delegate)
+        case .google(let clientID, let serverClientID):
+            GoogleSignIn.signIn(
+                dispatch: dispatch,
+                clientID: clientID,
+                serverClientID: serverClientID
+            )
         case .email:
             dispatch(.failure("Авторизация email не реализована"))
         case .phone:

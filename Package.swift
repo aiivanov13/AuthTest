@@ -6,14 +6,22 @@ import PackageDescription
 let package = Package(
     name: "AuthModule",
     defaultLocalization: "ru",
-    platforms: [.iOS(.v14)],
+    platforms: [.iOS(.v16)],
     products: [
         .library(
             name: "AuthModule",
-            targets: ["AuthModule"]),
+            targets: ["AuthModule"]
+        ),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/google/GoogleSignIn-iOS", from: "7.0.0")
     ],
     targets: [
         .target(
-            name: "AuthModule"),
+            name: "AuthModule",
+            dependencies: [
+                .product(name: "GoogleSignIn", package: "googlesignin-ios")
+            ]
+        )
     ]
 )

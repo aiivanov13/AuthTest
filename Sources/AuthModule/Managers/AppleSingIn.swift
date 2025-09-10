@@ -9,7 +9,7 @@ import Foundation
 import AuthenticationServices
 
 @MainActor
-final class AppleAuth {
+final class AppleSignIn {
     typealias AppleDelegate = ASAuthorizationControllerDelegate & ASAuthorizationControllerPresentationContextProviding
 
     static func signIn(delegate: AppleDelegate?) {
@@ -25,18 +25,22 @@ final class AppleAuth {
 }
 
 final class AppleAuthDelegate: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
-    private let dispatch: (AuthAction) -> Void
+    private let dispatch: (ReturnedType) -> Void
     private let onFinish: () -> Void
     
-    init(dispatch: @escaping (AuthAction) -> Void, onFinish: @escaping () -> Void) {
+    init(dispatch: @escaping (ReturnedType) -> Void, onFinish: @escaping () -> Void) {
         self.dispatch = dispatch
         self.onFinish = onFinish
     }
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        if let credential = authorization.credential as? ASAuthorizationAppleIDCredential {
-            let user = User(id: credential.user, name: credential.fullName?.givenName, email: credential.email)
-            dispatch(.success(user))
+        if let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+        let idTokenData = credential.identityToken,
+        let idToken = String(data: idTokenData, encoding: .utf8) {
+            let data = SocialAuthData(idToken: idToken, email: credential.email ?? "")
+
+            //            dispatch(.setLoading(true))
+            dispatch(.success(data))
         } else {
             dispatch(.failure("Не удалось получить credential"))
         }
@@ -49,6 +53,6 @@ final class AppleAuthDelegate: NSObject, ASAuthorizationControllerDelegate, ASAu
     }
     
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        UIApplication.shared.windows.first { $0.isKeyWindow }!
+        (UIApplication.shared.connectedScenes.first as? UIWindowScene)!.windows.first { $0.isKeyWindow }!
     }
 }
