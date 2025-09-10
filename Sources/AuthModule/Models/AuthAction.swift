@@ -9,7 +9,7 @@ import Foundation
 
 public enum AuthType {
     case apple
-    case google(clientID: String, serverClientID: String)
+    case google(serverClientID: String)
     case email(EmailAuthData)
     case phone(PhoneAuthData)
 }
