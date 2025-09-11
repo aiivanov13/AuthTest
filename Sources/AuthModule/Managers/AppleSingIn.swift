@@ -43,11 +43,13 @@ final class AppleAuthDelegate: NSObject, ASAuthorizationControllerDelegate, ASAu
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
                 self?.dispatch(.success(data))
+                self?.onFinish()
             }
         } else {
             dispatch(.failure("Не удалось получить credential"))
+            onFinish()
         }
-        onFinish()
+//        onFinish()
     }
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
