@@ -39,8 +39,11 @@ final class AppleAuthDelegate: NSObject, ASAuthorizationControllerDelegate, ASAu
         let idToken = String(data: idTokenData, encoding: .utf8) {
             let data = SocialAuthData(idToken: idToken, email: credential.email ?? "")
 
-            //            dispatch(.setLoading(true))
-            dispatch(.success(data))
+            dispatch(.setLoading(true))
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                self?.dispatch(.success(data))
+            }
         } else {
             dispatch(.failure("Не удалось получить credential"))
         }
