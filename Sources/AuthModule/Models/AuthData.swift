@@ -10,15 +10,15 @@ import Foundation
 public protocol AuthData: Equatable { }
 
 public struct EmailAuthData: AuthData {
-    var email: String
-    var password: String
+    public var email: String
+    public var password: String
 }
 
 public struct PhoneAuthData: AuthData {
-    var phone: String
+    public var phone: String
 }
 
 public struct SocialAuthData: AuthData {
-    var idToken: String
-    var email: String
+    public var idToken: String
+    public var email: String
 }

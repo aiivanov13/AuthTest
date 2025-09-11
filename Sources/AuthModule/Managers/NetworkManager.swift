@@ -9,4 +9,7 @@ import Foundation
 
 final class NetworkManager {
     
+    func getData(_ data: any AuthData, path: String, dispatch: @escaping (ReturnedType) -> Void) {
+        
+    }
 }
